@@ -1,62 +1,129 @@
-var mouseEvent = "empty";
-var last_position_of_x, last_position_of_y;
+var paddle2 =10,paddle1=10;
 
-canvas = document.getElementById('myCanvas');
-ctx = canvas.getContext("2d");
+var paddle1X = 10,paddle1Height =110;
+var paddle2Y = 685,paddle2Height =70;
 
-color="whitesmoke";
-width_of_line = 1;
-canvas.addEventListener("mousedown", my_mousedown);
+var score1 =0, score2 =0;
+var paddle1Y;
 
-function my_mousedown(e){
-    color = document.getElementById("color").value;
-    width_of_line = document.getElementById("width_of_line").value;
-    mouseEvent = "mouseDown";
+var playerscore =0;
+var audio1;
+var pcscore =0;
+var ball ={
+    x:350/2,
+    y:480/2,
+    r:20,
+    dx:3,
+    dy:3,
 }
 
-canvas.addEventListener("mousemove", my_mousemove);
+function setup(){
+    var canvas = createCanvas(700,600);
+}
+function draw(){
+    background (0);
 
-function my_mousemove(e){
-    current_position_of_mouse_x=e.clientX-canvas.offsetLeft;
-    current_position_of_mouse_y=e.clientY-canvas.offsetTop;
+    fill("black");
+    stroke("black");
+    rect(600,0,20,700);
 
-    if (mouseEvent == "mouseDown"){
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width_of_line;
+    fill("black");
+    stroke("black");
+    rect(0,0,20,700);
+    
+    paddleInCanvas();
+    fill(250,0,0);
+    stroke(0,0,250);
+    strokeWeight(0.5);
+    paddle1Y = mouseY;
+    rect(paddle1X,paddle1Y,paddle1,paddle1Height,100);
 
-        console.log("last position of x and y coordinates = ");
-        console.log("x = "+ last_position_of_x + "y = "+ last_position_of_y);
-        ctx.moveTo(last_position_of_x,last_position_of_y);
+    fill("#FFA500")
+    stroke("#FFA500")
+    var paddle2y = ball.y-paddle2Height/2;
+    rect(paddle2Y,paddle2y,paddle2,paddle2Height,100);
+    midline();
 
-        console.log("current position of x and y coordinates = ");
-        console.log("x = "+current_position_of_mouse_x + "y = "+ current_position_of_mouse_y);
-        ctx.lineTo(current_position_of_mouse_x, current_position_of_mouse_y);
-        ctx.stroke();
+    drawScore();
+    models();
+    move();
+}
+
+function reset(){
+    ball.x = width/2+100;  
+    ball.y = height/2+100;
+    ball.dx=3;
+    ball.dy=3;
+}
+function midline(){
+    for(i=0;i<480;i+=10){
+        var y =0;
+
+        fill("white");
+        stroke(0);
+        rect(width/2,y+i,10,480);
     }
-
-    last_position_of_x = current_position_of_mouse_x;
-    last_position_of_y = current_position_of_mouse_y;
 }
-
-canvas.addEventListener("mouseup", my_mouseup);
-function my_mouseup(e){
-    mouseEvent = "mouseUP";
+function drawScore(){
+    textAlign(CENTER);
+    textSize(20);
+    fill("white");
+    stroke(250,0,0);
+    text("Player1:    ",100,50);
+    text(playerscore,140,50);
+    text("Bot1:    ",500,50);
+    text(pcscore,555,50);
 }
-canvas.addEventListener("mouseleave", my_mouseleave);
-function my_mouseleave(e){
-    mouseEvent = "mouseleave";
+function move(){
+    fill(50,350,0);
+    stroke(255,0,0);
+    strokeWeight(0.5);
+    ellipse(ball.x,ball.y,ball.r,20);
+    ball.x = ball.x+ball.dx;
+    ball.y = ball.y+ball.dy;
+    if(ball.x+ball.r>width-ball.r/2){
+        ball.dx =-ball.dx-0.5;
+    }
+    if(ball.x-2.5*ball.r/2<0){
+        if(ball.y >= paddle1Y && ball.y <=paddle1Y+paddle1Height){
+            ball.dx =- ball.dx+0.5;
+            playerscore++;
+        }
+        else{
+            pcscore++;
+            reset();
+            navigator.vibrate(100);
+
+        }
+    }
+    if(pcscore ==4){
+        fill("FFA500");
+        stroke(0);
+        rect(0,0,width,height-1);
+        fill("white")
+        stroke("white")
+        textSize(25);
+        text("FIN DEL JUEGO, RECARGA LA PAGINA",width/2,height/2);
+        noLoop();
+        pcscore = 0
+    }
+    if(ball.y+ball.r > height || ball.y-ball.r <0){
+        ball.dy =- ball.dy;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-function clearArea(){
-    ctx.clearRect(0,0, canvas.width, canvas.height);
+function models(){
+    textSize(18);
+    fill(255);
+    noStroke();
+    text("    Ancho:"+width,135,15);
+    text("Velocidad:"+abs(ball.dx),50,15);
+    text("Altura:"+height,235,15);
+}
+function paddleInCanvas(){
+    if(mouseY+paddle1Height >height){
+        mouseY=height-paddle1Height;
+    }
+    if(mouseY < 0){
+        mouseY=0;
+    }
 }
